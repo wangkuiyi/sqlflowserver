@@ -1,16 +1,15 @@
 syntax = "proto3";
 
+package main;
+
 service SQLFlow {
-  rpc Run(RunRequest) returns (RunReply) {}
+  // Run returns a stream of RunReply.  The first reply has
+  // Table.schema set; and the rest replies have Table.columns.
+  rpc Run(RunRequest) returns (stream Table) {}
 }
 
 message RunRequest {
   string sql = 1;		// The SQL statement to be executed.
-}
-
-message RunReply {
-  string error = 1;	 // An empty string indicates no error.
-  Table table  = 2;	 // `show databases` and `select` return data.
 }
 
 // Table represents the schema and rows of a RDBMA table.  It
