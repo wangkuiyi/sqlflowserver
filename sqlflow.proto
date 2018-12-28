@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package main;
+package sqlflow;
 
 service SQLFlow {
   // Run runs a SQL statement and returns a stream of RunResponse.  Some
