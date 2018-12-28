@@ -13,14 +13,14 @@ service SQLFlow {
   // RunReply.error and RunReply.columns set -- each RunReply doesn't
   // exceed the maximum message size
   // (https://stackoverflow.com/a/34186672/724872).
-  rpc Run(RunRequest) returns (stream RunReply) {}
+  rpc Run (RunRequest) returns (stream RunResponse);
 }
 
 message RunRequest {
   string sql = 1;		// The SQL statement to be executed.
 }
 
-message RunReply {
+message RunResponse {
   string error = 1;
   map<string, FieldType> schema = 2; // only set if RunRequest.sql returns data.
   map<string, Column> columns = 3; // only set if RunRequest.sql returns data.
