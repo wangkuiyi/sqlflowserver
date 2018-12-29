@@ -20,23 +20,33 @@ message RunRequest {
 
 // SQL statements like `USE database` returns only a success message.
 // In such cases, the return stream contains only one RunResponse with
-// RunResponse.message set.
+// RunResponse.messages set.
 //
 // SQL statements like `SELECT ...` returns a table in addition
-// to the status, and the table might be big.  In such cases, Run returns a
+// to the status, and the table might be big. In such cases, Run returns a
 // stream of RunResponse
 //
-// SQL statement like `SELECT ... TRAIN/PREDICT ...` returns a stream of message
+// SQL statement like `SELECT ... TRAIN/PREDICT ...` returns a stream of messages
 // which indicates the training/predicting progress
 //
 // Each RunResponse doesn't exceed the maximum message size
 // (https://stackoverflow.com/a/34186672/724872).
 message RunResponse {
-  repeated string message = 1;
-  map<string, Column> columns = 2; // only set if RunRequest.sql returns data.
+  oneof response {
+    Messages messages = 1;
+    Columns columns = 2;
+  }
 }
 
-// A data column of any type
-message Column {
-  repeated google.protobuf.Any data = 1;
+message Messages {
+  repeated string messages = 1;
+}
+
+message Columns {
+  map<string, Column> columns = 1;
+
+  // A data column of any type
+  message Column {
+      repeated google.protobuf.Any data = 1;
+  }
 }
