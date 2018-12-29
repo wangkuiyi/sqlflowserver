@@ -1,51 +1,42 @@
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 package sqlflow;
 
 service SQLFlow {
-  // Run runs a SQL statement and returns a stream of RunResponse.  Some
-  // SQL statements like `USE database` returns only a success message.
-  // In such cases, the return stream contains only one RunResponse with
-  // RunResponse.message set.  Some other SQL statements like `SELECT ...`
-  // returns a table in addition to the status, and the table might be
-  // big.  In such cases, Run returns a stream of RunResponse -- the
-  // first one has RunResponse.schema set, and all RunReplies have
-  // RunResponse.error and RunResponse.columns set -- each RunResponse doesn't
-  // exceed the maximum message size
-  // (https://stackoverflow.com/a/34186672/724872).
+  // Run runs a SQL statement and returns a stream of RunResponse.
   rpc Run (RunRequest) returns (stream RunResponse);
 }
 
+// SQL statements to be executed
+// e.g.
+//      1. `USE database`
+//      2. `SELECT ...`
+//      3. `SELECT ... TRAIN/PREDICT ...`
 message RunRequest {
   string sql = 1;		// The SQL statement to be executed.
 }
 
+// SQL statements like `USE database` returns only a success message.
+// In such cases, the return stream contains only one RunResponse with
+// RunResponse.message set.
+//
+// SQL statements like `SELECT ...` returns a table in addition
+// to the status, and the table might be big.  In such cases, Run returns a
+// stream of RunResponse
+//
+// SQL statement like `SELECT ... TRAIN/PREDICT ...` returns a stream of message
+// which indicates the training/predicting progress
+//
+// Each RunResponse doesn't exceed the maximum message size
+// (https://stackoverflow.com/a/34186672/724872).
 message RunResponse {
   repeated string message = 1;
-  map<string, FieldType> schema = 2; // only set if RunRequest.sql returns data.
-  map<string, Column> columns = 3; // only set if RunRequest.sql returns data.
+  map<string, Column> columns = 2; // only set if RunRequest.sql returns data.
 }
 
-// Due to https://github.com/protocolbuffers/protobuf/issues/2388,
-// we cannot write map<string, repeated string>; instead, we need to
-// define repeated string as Column.
+// A data column of any type
 message Column {
-  repeated string data = 1;
+  repeated google.protobuf.Any data = 1;
 }
-
-// We take https://dev.mysql.com/doc/refman/8.0/en/data-types.html
-// as the reference.  Because the real data is in text format as
-// defined in message Column, we simplify type indicators here: INT
-// represents all types of integer values in MySQL 8.0: TINYINT,
-// INT, etc; FLOAT represent both fixed-point and floating-point and
-// both 4-byte and 8-byte real values in MySQL 8.0.  DATE represents
-// DATE, DATETIME, and TIMESTAMP.  STRING represents CHAR, VARCHAR,
-// BINARY, VARBINARY, BLOB, TEXT.  More enum for other types like
-// JSON and spatial in the future.
-enum FieldType {
-  INT = 0; 
-  FLOAT = 1; 
-  DATE = 2; 
-  STRING = 3; 
-}
-

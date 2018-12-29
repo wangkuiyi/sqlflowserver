@@ -1,10 +1,12 @@
 # sqlflowserver
 The gRPC proxy server of SQL engines
 
-## Build and Test
+## Build
 
-According to https://bit.ly/2BCxGwH, we are supposed to commit the protoc-generated Go source files.  So, to build and test, we can run the following command:
+We have included the precompiled protobuf.
+
+In case you need to rebuild after modify the `sqlflow.proto`, run
 
 ```bash
-protoc --go_out=plugins=grpc:. *.proto && go test -v
+protoc sqlflow.proto --go_out=plugins=grpc:. -I $PROTO_INCLUDE --proto_path=.
 ```
