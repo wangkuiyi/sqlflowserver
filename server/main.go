@@ -1,3 +1,5 @@
+//go:generate protoc -I .. --go_out=plugins=grpc:.. ../sqlflow.proto
+
 package main
 
 import (
