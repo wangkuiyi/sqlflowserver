@@ -10,5 +10,5 @@ The gRPC proxy server of SQL engines
 ## Running
 
 ```bash
-cd server && go generate .. && go run main.go
+go generate && cd server && go run main.go
 ```
